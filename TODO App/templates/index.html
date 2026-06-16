@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f5;
+      --surface: #ffffff;
+      --surface-soft: #fafafa;
+      --text: #1a1a1a;
+      --muted: #767676;
+      --border: #e7e7e7;
+      --border-strong: #d8d8d8;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --accent-soft: #eef2ff;
+      --danger: #ef4444;
+      --danger-soft: #fef2f2;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    body[data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #111827;
+      --surface-soft: #0b1220;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --border: #243043;
+      --border-strong: #334155;
+      --accent: #818cf8;
+      --accent-hover: #6366f1;
+      --accent-soft: rgba(129, 140, 248, 0.16);
+      --danger: #f87171;
+      --danger-soft: rgba(248, 113, 113, 0.14);
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 60px 16px;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 560px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card-header {
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .theme-toggle {
+      background: var(--surface-soft);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .add-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .add-form input {
+      flex: 1;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 9px 13px;
+      font-size: 0.9rem;
+      outline: none;
+      background: var(--surface);
+      color: var(--text);
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+
+    .add-form input:focus { border-color: var(--accent); }
+
+    .add-form button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 18px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .add-form button:hover { background: var(--accent-hover); }
+    .add-form button:active { transform: translateY(1px); }
+
+    .list {
+      padding: 8px 0;
+      min-height: 60px;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.875rem;
+      padding: 40px 0;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 28px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+
+    .item:last-child { border-bottom: none; }
+    .item:hover { background: var(--surface-soft); }
+
+    .item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .item-text {
+      flex: 1;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      cursor: text;
+      border-radius: 4px;
+      padding: 2px 4px;
+      margin: -2px -4px;
+      transition: background 0.1s;
+    }
+
+    .item-text:hover { background: var(--accent-soft); }
+
+    .item-text.done {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .item-text-input {
+      flex: 1;
+      border: 1.5px solid var(--accent);
+      border-radius: 6px;
+      padding: 3px 7px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+    }
+
+    .btn-icon {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-icon:hover { color: var(--danger); background: var(--danger-soft); }
+
+    .stats {
+      padding: 12px 28px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <div class="header-row">
+        <h1>My Tasks</h1>
+        <button class="theme-toggle" id="themeToggle" type="button">Dark mode</button>
+      </div>
+      <form class="add-form" id="addForm">
+        <input type="text" id="newTask" placeholder="Add a new task..." autocomplete="off">
+        <button type="submit">Add</button>
+      </form>
+    </div>
+    <div class="list" id="list">
+      <p class="empty">No tasks yet. Add one above!</p>
+    </div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <script>
+    let todos = [];
+    const themeKey = 'todo-theme';
+
+    function escHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function getPreferredTheme() {
+      const saved = localStorage.getItem(themeKey);
+      if (saved === 'light' || saved === 'dark') {
+        return saved;
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function applyTheme(theme) {
+      document.body.dataset.theme = theme;
+      localStorage.setItem(themeKey, theme);
+
+      const toggle = document.getElementById('themeToggle');
+      const next = theme === 'dark' ? 'light' : 'dark';
+      toggle.textContent = `${next.charAt(0).toUpperCase() + next.slice(1)} mode`;
+      toggle.setAttribute('aria-pressed', String(theme === 'dark'));
+      toggle.setAttribute('aria-label', `Switch to ${next} mode`);
+    }
+
+    function initTheme() {
+      applyTheme(getPreferredTheme());
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        const current = document.body.dataset.theme === 'dark' ? 'dark' : 'light';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    }
+
+    async function fetchTodos() {
+      const res = await fetch('/api/todos');
+      todos = await res.json();
+      render();
+    }
+
+    function render() {
+      const list = document.getElementById('list');
+      const stats = document.getElementById('stats');
+
+      if (todos.length === 0) {
+        list.innerHTML = '<p class="empty">No tasks yet. Add one above!</p>';
+        stats.textContent = '';
+        return;
+      }
+
+      list.innerHTML = todos.map(t => `
+        <div class="item" data-id="${t.id}">
+          <input type="checkbox" ${t.done ? 'checked' : ''}
+            onchange="toggleDone(${t.id})">
+          <span class="item-text ${t.done ? 'done' : ''}"
+            ondblclick="startEdit(${t.id})"
+            title="Double-click to edit">${escHtml(t.text)}</span>
+          <button class="btn-icon" onclick="deleteTodo(${t.id})" title="Delete">x</button>
+        </div>
+      `).join('');
+
+      const done = todos.filter(t => t.done).length;
+      stats.textContent = `${done} of ${todos.length} completed`;
+    }
+
+    document.getElementById('addForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const input = document.getElementById('newTask');
+      const text = input.value.trim();
+      if (!text) return;
+      await fetch('/api/todos', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text})
+      });
+      input.value = '';
+      fetchTodos();
+    });
+
+    async function toggleDone(id) {
+      await fetch(`/api/todos/${id}/done`, {method: 'PATCH'});
+      fetchTodos();
+    }
+
+    async function deleteTodo(id) {
+      await fetch(`/api/todos/${id}`, {method: 'DELETE'});
+      fetchTodos();
+    }
+
+    function startEdit(id) {
+      const item = document.querySelector(`.item[data-id="${id}"]`);
+      const span = item.querySelector('.item-text');
+      const current = todos.find(t => t.id === id).text;
+
+      const input = document.createElement('input');
+      input.className = 'item-text-input';
+      input.value = current;
+      span.replaceWith(input);
+      input.focus();
+      input.select();
+
+      async function commitEdit() {
+        const newText = input.value.trim();
+        if (newText && newText !== current) {
+          await fetch(`/api/todos/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({text: newText})
+          });
+        }
+        fetchTodos();
+      }
+
+      input.addEventListener('blur', commitEdit);
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') input.blur();
+        if (e.key === 'Escape') fetchTodos();
+      });
+    }
+
+    initTheme();
+    fetchTodos();
+  </script>
+</body>
+</html>

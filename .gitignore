@@ -1,0 +1,11 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# App runtime data
+TODO App/todos.json
+
+# Local tooling and scratch files
+.claude/
+.superpowers/
+Testing/
